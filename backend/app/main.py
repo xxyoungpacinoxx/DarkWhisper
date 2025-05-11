@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from db import init_db
+from app.db import init_db
 from routers import chat, auth
 
 @asynccontextmanager

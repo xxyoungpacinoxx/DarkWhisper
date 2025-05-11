@@ -2,7 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, De
 from typing import Dict
 from app.schemas.chat_schemas import ChatRequest, ChatResponse
 from app.dependencies import get_current_user
-from app.models.user import User
+from app.models.user_models import User
 from jose import JWTError, jwt
 from app.utils import SECRET_KEY, ALGORITHM
 
