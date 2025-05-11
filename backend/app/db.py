@@ -9,3 +9,8 @@ engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+# Initialize the database
+def init_db():
+    # Create tables if they don't exist
+    Base.metadata.create_all(bind=engine)
