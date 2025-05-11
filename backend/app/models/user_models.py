@@ -7,6 +7,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(255), index=True, unique=True)
+    hashed_password = Column(String(255))
     node_address = Column(String(256), unique=True, index=True)
     
     def __repr__(self):
