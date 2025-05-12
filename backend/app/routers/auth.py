@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from app.models.user_models import User
@@ -31,11 +32,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": new_user.username})
     return {"access_token": access_token}
 
+
 @router.post("/login", response_model=Token)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     access_token = create_access_token(data={"sub": db_user.username})
-    return {"access_token": access_token}
+    response = JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,  # prevents JavaScript access
+        secure=False,    # only sent via HTTPS
+        samesite="Lax", # restricts cross-site cookie sending
+        max_age=3600    # 1 hour
+    )
+    return response
