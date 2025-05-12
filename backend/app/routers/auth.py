@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from app.models.user_models import User
 from app.schemas.user_schemas import UserCreate, UserLogin, Token
 from ..utils import get_password_hash, verify_password, create_access_token
 from ..utils import generate_node_address
+from app.dependencies import get_current_user
+
 
 router = APIRouter()
 
@@ -50,3 +53,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         max_age=3600    # 1 hour
     )
     return response
+
+
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "username": current_user.username,
+        "node_address": current_user.node_address
+    }
+
