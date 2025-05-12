@@ -17,11 +17,12 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to your frontend domain
+    allow_origins=["http://127.0.0.1:8000"],  # Use your actual frontend domain here
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 app.include_router(chat.router)
@@ -42,3 +43,9 @@ def get_register_page():
 @app.get("/login")
 def get_login_page():
     return FileResponse("app/static/login/login.html", media_type='text/html')
+
+
+# Route to serve login HTML
+@app.get("/dashboard")
+def get_login_page():
+    return FileResponse("app/static/dashboard/dashboard.html", media_type='text/html')
