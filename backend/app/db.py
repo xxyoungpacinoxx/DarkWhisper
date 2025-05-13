@@ -12,5 +12,6 @@ Base = declarative_base()
 
 # Initialize the database
 def init_db():
+    from app.models import user_models, chat_models
     # Create tables if they don't exist
     Base.metadata.create_all(bind=engine)
