@@ -19,7 +19,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/register", response_model=Token)
+@router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
@@ -32,8 +32,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    access_token = create_access_token(data={"sub": new_user.username})
-    return {"access_token": access_token}
+    return {"message": "User registered successfully. Please log in."}
+
 
 
 @router.post("/login", response_model=Token)
