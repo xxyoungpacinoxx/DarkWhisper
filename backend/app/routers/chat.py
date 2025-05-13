@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
 from typing import Dict
 from app.schemas.chat_schemas import ChatRequest, ChatResponse
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_token_from_request
 from app.models.user_models import User
 from jose import JWTError, jwt
 from app.utils import SECRET_KEY, ALGORITHM
@@ -13,7 +13,7 @@ active_connections: Dict[str, WebSocket] = {}
 pending_requests: Dict[str, str] = {}
 
 @router.post("/chat/request", response_model=ChatResponse)
-async def request_chat(request: ChatRequest, current_user: User = Depends(get_current_user)):
+async def request_chat(request: ChatRequest, current_user: User = Depends(get_token_from_request)):
     if request.receiver_node not in active_connections:
         raise HTTPException(status_code=404, detail="Receiver not connected")
 
