@@ -3,115 +3,212 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard - DarkWhisper</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Quicksand', sans-serif;
-    }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #000;
-    }
-    section {
-      position: absolute;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 2px;
-      flex-wrap: wrap;
-      overflow: hidden;
-    }
-    section::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(#000,#0f0,#000);
-      animation: animate 5s linear infinite;
-    }
-    @keyframes animate {
-      0% { transform: translateY(-100%); }
-      100% { transform: translateY(100%); }
-    }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Quicksand', sans-serif;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #000;
+    overflow: hidden;
+  }
+
+  section {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  section::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(#000, #0f0, #000);
+    animation: animate 5s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes animate {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  section span {
+    position: relative;
+    display: block;
+    width: calc(6.25vw - 2px);
+    height: calc(6.25vw - 2px);
+    background: #181818;
+    z-index: 2;
+    transition: background 0.3s ease;
+  }
+
+  section span:hover {
+    background: #0f0;
+    transition: none;
+  }
+
+  .dashboard {
+    position: absolute;
+    width: 500px;
+    background: rgba(34, 34, 34, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+    color: #0f0;
+    text-align: center;
+  }
+
+  .dashboard h1 {
+    margin-bottom: 20px;
+    font-size: 2em;
+  }
+
+  .dashboard p {
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #fff;
+  }
+
+  .dashboard .link-box {
+    background: #111;
+    color: #0f0;
+    padding: 10px 20px;
+    border-radius: 6px;
+    word-break: break-word;
+    margin-top: 15px;
+  }
+
+  .chat-btn, .request-btn {
+    background: #0f0;
+    border: none;
+    color: #000;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    margin-top: 15px;
+  }
+
+  .chat-btn:hover, .request-btn:hover {
+    background: #0a0;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-content {
+    background: rgba(30, 30, 30, 0.9);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #0f0;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+    color: #0f0;
+  }
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #aaa;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+
+  .request-item {
+    background: #111;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .request-message {
+    color: #fff;
+  }
+
+  .request-actions button {
+    margin-right: 10px;
+    padding: 6px 12px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .accept-btn {
+    background-color: #0f0;
+    color: #000;
+  }
+
+  .reject-btn {
+    background-color: #f00;
+    color: #fff;
+  }
+
+  @media (max-width: 600px) {
     section span {
-      position: relative;
-      display: block;
-      width: calc(6.25vw - 2px);
-      height: calc(6.25vw - 2px);
-      background: #181818;
-      z-index: 2;
-      transition: 1.5s;
+      width: calc(20vw - 2px);
+      height: calc(20vw - 2px);
     }
-    section span:hover {
-      background: #0f0;
-      transition: 0s;
-    }
+
     .dashboard {
-      position: absolute;
-      width: 500px;
-      background: rgba(34, 34, 34, 0.8);
-      backdrop-filter: blur(10px);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.9);
-      color: #0f0;
-      text-align: center;
+      width: 90%;
+      padding: 20px;
     }
-    .dashboard h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
-    }
-    .dashboard p {
-      margin: 10px 0;
-      font-size: 1.2em;
-      color: #fff;
-    }
-    .dashboard .link-box {
-      background: #111;
-      color: #0f0;
-      padding: 10px 20px;
-      border-radius: 5px;
-      word-break: break-word;
-      margin-top: 15px;
-    }
-    .chat-btn {
-      background: #0f0;
-      border: none;
-      color: #000;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s ease;
-    }
-    .chat-btn:hover {
-      background: #0a0;
-    }
-    @media (max-width: 600px) {
-      section span {
-        width: calc(20vw - 2px);
-        height: calc(20vw - 2px);
-      }
-      .dashboard {
-        width: 90%;
-        padding: 20px;
-      }
-    }
-  </style>
+  }
+</style>
+
 </head>
 <body>
 <section>
@@ -387,10 +484,19 @@
 
       <!-- Buttons -->
       <div style="display: flex; gap: 15px; margin-top: 25px;">
-        <button class="chat-btn">Request Chat Room</button>
-        <button class="chat-btn">Request Chat Room</button>
+        <button class="request-btn" onclick="openModal()">Requests</button>
+        <button class="chat-btn">Chat Room</button>
       </div>
     </div>
+
+      <!-- Modal -->
+      <div id="requestModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2>Incoming Requests</h2>
+          <div id="requestList"></div>
+        </div>
+      </div>
   </section>
 
   <script>
@@ -424,6 +530,114 @@ async function fetchUserData() {
 
 // Call this function after the page loads
 fetchUserData();
+
+
+const apiUrl = "http://127.0.0.1:8000/chat/requests"; // URL of your FastAPI endpoint
+
+// Function to format the sender_node
+function formatSenderNode(node) {
+  const firstPart = node.slice(0, 10);  // First 10 characters
+  const lastPart = node.slice(-7);      // Last 7 characters
+  return `${firstPart}...${lastPart}`;  // Concatenate with "..."
+}
+
+// Fetch chat requests from the backend
+async function fetchRequests() {
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include' // This ensures the cookie is sent with the request
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch requests');
+    }
+
+    const data = await response.json();
+    return data; // This should return an array of requests
+  } catch (error) {
+    console.error('Error fetching requests:', error);
+    return []; // In case of error, return an empty array
+  }
+}
+
+function openModal() {
+  document.getElementById("requestModal").style.display = "block";
+  loadRequests();
+}
+
+function closeModal() {
+  document.getElementById("requestModal").style.display = "none";
+}
+
+async function loadRequests() {
+  const requestList = document.getElementById("requestList");
+  requestList.innerHTML = ""; // clear old content
+
+  const requests = await fetchRequests(); // Fetch real requests
+
+  if (requests.length === 0) {
+    requestList.innerHTML = "<p>No requests found.</p>";
+    return;
+  }
+
+  requests.forEach(req => {
+    const item = document.createElement("div");
+    item.className = "request-item";
+    item.innerHTML = `
+      <div class="request-message"><strong>From:</strong> ${formatSenderNode(req.sender_node)}<br>
+      <strong>Message:</strong> ${req.message}</div>
+      <div class="request-actions">
+        <button class="accept-btn" onclick="handleAccept(${req.id})">Accept</button>
+        <button class="reject-btn" onclick="handleReject(${req.id})">Reject</button>
+      </div>
+    `;
+    requestList.appendChild(item);
+  });
+}
+
+async function handleAccept(id) {
+  // Call your backend to accept the request and update the status
+  const response = await fetch(`${apiUrl}/${id}/accept`, { 
+    method: 'POST', 
+    credentials: 'include' // Include cookies for the POST request as well
+  });
+  
+  if (response.ok) {
+    alert(`Accepted request with ID ${id}`);
+    loadRequests(); // Reload requests to reflect the changes
+  } else {
+    alert('Failed to accept request');
+  }
+}
+
+async function handleReject(id) {
+  // Call your backend to reject the request and update the status
+  const response = await fetch(`${apiUrl}/${id}/reject`, { 
+    method: 'POST', 
+    credentials: 'include' // Include cookies for the POST request as well
+  });
+  
+  if (response.ok) {
+    alert(`Rejected request with ID ${id}`);
+    loadRequests(); // Reload requests to reflect the changes
+  } else {
+    alert('Failed to reject request');
+  }
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+  const modal = document.getElementById("requestModal");
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+
 
   </script>
 </body>
