@@ -716,6 +716,53 @@ async function loadRequests() {
   });
 }
 
+async function handleAccept(requestId) {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/chat/request/${requestId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status: 'accepted' })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to accept request: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Request accepted:', data);
+    
+    // Reload requests to reflect the change
+    loadRequests();
+  } catch (error) {
+    console.error('Error accepting request:', error);
+  }
+}
+
+async function handleReject(requestId) {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/chat/request/${requestId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status: 'rejected' })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to reject request: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Request rejected:', data);
+    
+    // Reload requests to reflect the change
+    loadRequests();
+  } catch (error) {
+    console.error('Error rejecting request:', error);
+  }
+}
+
+
 
 async function fetchHistory() {
   try {
@@ -780,15 +827,6 @@ function formatSenderNode(node) {
   return `${firstPart}...${lastPart}`;  // Concatenate with "..."
 }
 
-function handleAccept(requestId) {
-  // Handle request acceptance logic here
-  console.log(`Accepted request with ID: ${requestId}`);
-}
-
-function handleReject(requestId) {
-  // Handle request rejection logic here
-  console.log(`Rejected request with ID: ${requestId}`);
-}
 
 function openModal() {
   document.getElementById('requestModal').style.display = 'block';
