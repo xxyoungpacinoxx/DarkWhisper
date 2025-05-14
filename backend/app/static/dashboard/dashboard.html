@@ -564,8 +564,10 @@
         </div>
 
         <div id="history-tab-content" class="tab-content">
-          <!-- Content for Request History goes here -->
-          <p>Request History content.</p>
+          <!-- Request history will be injected here -->
+          <div id="historyList"></div>
+        </div>
+
         </div>
       </div>
     </div>
@@ -608,21 +610,23 @@ async function fetchUserData() {
 fetchUserData();
 
   
-// Function to handle switching tabs
- function switchTab(tabName) {
-  // Remove active class from all tabs
+function switchTab(tabName) {
+  // Remove active class from all tabs and content
   document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-  // Add active class to the selected tab and its content
+  // Add active class to selected tab
   document.getElementById(`${tabName}-tab`).classList.add('active');
   document.getElementById(`${tabName}-tab-content`).classList.add('active');
 
-  // If switching to the "Receive Request" tab, load requests
+  // Load relevant data
   if (tabName === 'receive') {
     loadRequests();
+  } else if (tabName === 'history') {
+    loadHistory();
   }
 }
+
 
 
 async function sendChatRequest() {
@@ -711,6 +715,64 @@ async function loadRequests() {
     requestList.appendChild(item);
   });
 }
+
+
+async function fetchHistory() {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/chat/requests/history', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch request history');
+    }
+
+    const historyData = await response.json();
+    return historyData;
+  } catch (error) {
+    console.error('Error fetching request history:', error);
+    return [];
+  }
+}
+
+
+async function loadHistory() {
+  const container = document.getElementById('historyList');
+  container.innerHTML = ''; // Clear previous entries
+
+  const history = await fetchHistory();
+
+  if (history.length === 0) {
+    container.innerHTML = '<p>No request history available.</p>';
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.style.display = 'flex';
+  list.style.flexDirection = 'column';
+  list.style.gap = '10px';
+
+  history.forEach(item => {
+    const entry = document.createElement('div');
+    entry.style.border = '1px solid #444';
+    entry.style.borderRadius = '8px';
+    entry.style.padding = '10px';
+    entry.style.background = '#111';
+    entry.style.color = '#0f0';
+    entry.innerHTML = `
+      <p><strong>Address:</strong> ${formatSenderNode(item.address)}</p>
+      <p><strong>Type:</strong> ${item.type === 'send' ? 'Sent' : 'Received'}</p>
+      <p><strong>Status:</strong> ${item.status}</p>
+    `;
+    list.appendChild(entry);
+  });
+
+  container.appendChild(list);
+}
+
+
 
 function formatSenderNode(node) {
   const firstPart = node.slice(0, 10);  // First 10 characters
