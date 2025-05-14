@@ -207,6 +207,35 @@
       padding: 20px;
     }
   }
+
+      .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+
+    .tabs button.active {
+      background: #0f0;
+    }
+
+    .tab-content {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
 </style>
 
 </head>
@@ -475,6 +504,8 @@
     <span></span>
 
 
+
+
     <div class="dashboard">
       <h1 id="username">Welcome, User</h1>
       <p>Your invite link:</p>
@@ -489,17 +520,62 @@
       </div>
     </div>
 
-      <!-- Modal -->
-      <div id="requestModal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeModal()">&times;</span>
-          <h2>Incoming Requests</h2>
+    <!-- Modal -->
+    <div id="requestModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Incoming Requests</h2>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button id="send-tab" class="active" onclick="switchTab('send')">Send Request</button>
+          <button id="receive-tab" onclick="switchTab('receive')">Receive Request</button>
+          <button id="history-tab" onclick="switchTab('history')">Request History</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="send-tab-content" class="tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <input
+              type="text"
+              id="receiverIdInput"
+              placeholder="Enter Receiver ID"
+              style="padding: 10px; border: none; border-radius: 6px; background: #111; color: #0f0; font-size: 1em;"
+            />
+            <textarea
+              id="messageInput"
+              placeholder="Enter your message"
+              rows="4"
+              style="padding: 10px; border: none; border-radius: 6px; background: #111; color: #0f0; font-size: 1em; resize: none;"
+            ></textarea>
+            <button
+              onclick="sendChatRequest()"
+              style="background: #0f0; color: #000; padding: 10px 20px; font-size: 1em; font-weight: bold; border: none; border-radius: 6px; cursor: pointer;"
+            >
+              Send Request
+            </button>
+          </div>
+        </div>
+
+
+        <div id="receive-tab-content" class="tab-content active">
+          <!-- Content for Receive Request goes here -->
           <div id="requestList"></div>
         </div>
+
+        <div id="history-tab-content" class="tab-content">
+          <!-- Content for Request History goes here -->
+          <p>Request History content.</p>
+        </div>
       </div>
+    </div>
+
+
+    
   </section>
 
   <script>
+
 async function fetchUserData() {
   try {
     const response = await fetch('/me', { 
@@ -531,25 +607,71 @@ async function fetchUserData() {
 // Call this function after the page loads
 fetchUserData();
 
+  
+// Function to handle switching tabs
+ function switchTab(tabName) {
+  // Remove active class from all tabs
+  document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-const apiUrl = "http://127.0.0.1:8000/chat/requests"; // URL of your FastAPI endpoint
+  // Add active class to the selected tab and its content
+  document.getElementById(`${tabName}-tab`).classList.add('active');
+  document.getElementById(`${tabName}-tab-content`).classList.add('active');
 
-// Function to format the sender_node
-function formatSenderNode(node) {
-  const firstPart = node.slice(0, 10);  // First 10 characters
-  const lastPart = node.slice(-7);      // Last 7 characters
-  return `${firstPart}...${lastPart}`;  // Concatenate with "..."
+  // If switching to the "Receive Request" tab, load requests
+  if (tabName === 'receive') {
+    loadRequests();
+  }
 }
 
-// Fetch chat requests from the backend
-async function fetchRequests() {
+
+async function sendChatRequest() {
+  const receiverNode = document.getElementById('receiverIdInput').value.trim();
+  const message = document.getElementById('messageInput').value.trim();
+
+  if (!receiverNode || !message) {
+    alert('Please fill in both Receiver ID and Message.');
+    return;
+  }
+
   try {
-    const response = await fetch(apiUrl, {
-      method: 'GET',
+    const response = await fetch('http://127.0.0.1:8000/chat/request', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      credentials: 'include' // This ensures the cookie is sent with the request
+      credentials: 'include',
+      body: JSON.stringify({
+        receiver_node: receiverNode,
+        message: message
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    alert('Request sent successfully!');
+    
+    // Optionally clear inputs
+    document.getElementById('receiverIdInput').value = '';
+    document.getElementById('messageInput').value = '';
+
+  } catch (error) {
+    console.error('Error sending request:', error);
+    alert('Failed to send request. Please try again.');
+  }
+}
+
+
+
+async function fetchRequests() {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/chat/requests', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     });
 
     if (!response.ok) {
@@ -557,25 +679,16 @@ async function fetchRequests() {
     }
 
     const data = await response.json();
-    return data; // This should return an array of requests
+    return data;
   } catch (error) {
     console.error('Error fetching requests:', error);
-    return []; // In case of error, return an empty array
+    return [];
   }
-}
-
-function openModal() {
-  document.getElementById("requestModal").style.display = "block";
-  loadRequests();
-}
-
-function closeModal() {
-  document.getElementById("requestModal").style.display = "none";
 }
 
 async function loadRequests() {
   const requestList = document.getElementById("requestList");
-  requestList.innerHTML = ""; // clear old content
+  requestList.innerHTML = ""; // Clear old content
 
   const requests = await fetchRequests(); // Fetch real requests
 
@@ -599,44 +712,29 @@ async function loadRequests() {
   });
 }
 
-async function handleAccept(id) {
-  // Call your backend to accept the request and update the status
-  const response = await fetch(`${apiUrl}/${id}/accept`, { 
-    method: 'POST', 
-    credentials: 'include' // Include cookies for the POST request as well
-  });
-  
-  if (response.ok) {
-    alert(`Accepted request with ID ${id}`);
-    loadRequests(); // Reload requests to reflect the changes
-  } else {
-    alert('Failed to accept request');
-  }
+function formatSenderNode(node) {
+  const firstPart = node.slice(0, 10);  // First 10 characters
+  const lastPart = node.slice(-7);      // Last 7 characters
+  return `${firstPart}...${lastPart}`;  // Concatenate with "..."
 }
 
-async function handleReject(id) {
-  // Call your backend to reject the request and update the status
-  const response = await fetch(`${apiUrl}/${id}/reject`, { 
-    method: 'POST', 
-    credentials: 'include' // Include cookies for the POST request as well
-  });
-  
-  if (response.ok) {
-    alert(`Rejected request with ID ${id}`);
-    loadRequests(); // Reload requests to reflect the changes
-  } else {
-    alert('Failed to reject request');
-  }
+function handleAccept(requestId) {
+  // Handle request acceptance logic here
+  console.log(`Accepted request with ID: ${requestId}`);
 }
 
-// Close modal when clicking outside of it
-window.onclick = function(event) {
-  const modal = document.getElementById("requestModal");
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
+function handleReject(requestId) {
+  // Handle request rejection logic here
+  console.log(`Rejected request with ID: ${requestId}`);
 }
 
+function openModal() {
+  document.getElementById('requestModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('requestModal').style.display = 'none';
+}
 
 
   </script>
