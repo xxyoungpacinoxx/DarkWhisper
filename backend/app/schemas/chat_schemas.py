@@ -17,3 +17,13 @@ class ChatRequestResponse(BaseModel):
 
 class ChatRequestStatusUpdate(BaseModel):
     status: Literal["accepted", "rejected"]
+
+
+class ChatRequestHistoryItem(BaseModel):
+    address: str  # The other user's node address
+    type: str     # "send" or "receive"
+    status: str
+
+    class Config:
+        orm_mode = True
+

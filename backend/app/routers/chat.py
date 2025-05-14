@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.dependencies import get_current_user, get_db
-from app.schemas.chat_schemas import ChatRequestCreate, ChatRequestResponse, ChatRequestStatusUpdate
+from app.schemas.chat_schemas import ChatRequestCreate, ChatRequestResponse, ChatRequestStatusUpdate, ChatRequestHistoryItem
 from app.models.user_models import User
 from app.models.chat_models import ChatRequest
 
@@ -53,3 +53,33 @@ def update_chat_request_status(
     db.commit()
     db.refresh(chat_req)
     return chat_req
+
+
+
+@router.get("/chat/requests/history", response_model=list[ChatRequestHistoryItem])
+def get_chat_request_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    all_requests = db.query(ChatRequest).filter(
+        (ChatRequest.sender_node == current_user.node_address) |
+        (ChatRequest.receiver_node == current_user.node_address)
+    ).all()
+
+    history = []
+
+    for req in all_requests:
+        if req.sender_node == current_user.node_address:
+            history.append(ChatRequestHistoryItem(
+                address=req.receiver_node,
+                type="send",
+                status=req.status
+            ))
+        else:
+            history.append(ChatRequestHistoryItem(
+                address=req.sender_node,
+                type="receive",
+                status=req.status
+            ))
+
+    return history
